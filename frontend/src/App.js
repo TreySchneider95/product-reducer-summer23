@@ -4,6 +4,10 @@ import './App.css';
 // import {v4 as uuidv4} from 'uuid'
 import productReducer from './reducers/productReducer'
 import ProductCard from './components/ProductCard';
+import { getProducts } from './redux/productSlice';
+import productSlice from './redux/productSlice';
+import { useSelector, useDispatch } from 'react-redux';
+import { deleteProduct, editProduct, addProduct } from './redux/productSlice';
 
 function App() {
   // const initialState = [
@@ -53,19 +57,25 @@ function App() {
 
   // const [product, dispatch] = useReducer(productReducer, initialState)
 
-  const [product, dispatch] = useReducer(productReducer, [])
- useEffect(() => {
-  const loadData = async () => {
-    const response = await fetch('http://localhost:4000/api/products/get-all-products')
-    const data = await response.json()
-    // console.log(data)
-    dispatch({
-      type: 'get-products',
-      payload: data
-    })
-  }
-  loadData()
- }, [])
+  // const [product, dispatch] = useReducer(productReducer, [])
+
+  const product = useSelector(state => state.products)
+  const dispatch = useDispatch()
+  
+  
+  useEffect(() => {
+    dispatch(getProducts())
+  // const loadData = async () => {
+  //   const response = await fetch('http://localhost:4000/api/products/get-all-products')
+  //   const data = await response.json()
+  //   // console.log(data)
+  //   dispatch({
+  //     type: 'get-products',
+  //     payload: data
+  //   })
+  // }
+  // loadData()
+ }, [dispatch, product.products])
  
 
  //make a button the calls to the store/list-products route
@@ -90,27 +100,24 @@ function App() {
 //   "price": 39.99
 // },
 
-const getAPIdata = async () => {
-  const response = await fetch('http://localhost:4000/api/store/list-products')
-  const data = await response.json()
-  dispatch({
-    type: 'add-store',
-    payload: data
-  })
-}
+// const getAPIdata = async () => {
+//   const response = await fetch('http://localhost:4000/api/store/list-products')
+//   const data = await response.json()
+//   dispatch({
+//     type: 'add-store',
+//     payload: data
+//   })
+// }
 
   return (
     <div className="App">
       <h1>Video Game Products</h1>
       <button onClick={
-        () => dispatch({
-          type: 'add-product'
-        })
+        ()=>dispatch(addProduct())
       }>Add Product</button>
 
-      <button onClick={getAPIdata}>API</button>
-      
-      {
+      {/* <button onClick={getAPIdata}>API</button> */}
+      {!product.products ?
         product.map((element) => {
           return (
           <ProductCard
@@ -121,21 +128,19 @@ const getAPIdata = async () => {
             genre={element.genre}
             price={element.price}
             deleteProduct = {
-              (id) => dispatch({
-                type: 'delete-product',
+              (id) => dispatch(deleteProduct({
                 id: id
-              })
+              }))
             }
             editProduct = {
-              (param) => dispatch({
-                type: 'edit-product',
+              (param) => dispatch(editProduct({
                 editedObj: param
-              })
+              }))
             }
           /> 
           )
         })
-     }
+     : ""}
     </div>
   );
 }
